@@ -6,9 +6,7 @@ import {
   BrowserWindow,
   BrowserWindowConstructorOptions,
   IpcMainEvent,
-  protocol,
-  systemPreferences,
-  Session
+  protocol
 } from "electron";
 import { debounce } from "lodash-es";
 import path from "path";
@@ -29,12 +27,8 @@ import { createApiView, createView, googleLoginPopup } from "./utils/view";
 import { rootWindowInjectUtils } from "./utils/webContentUtils";
 import { appIconPath, wrapWindowHandler } from "./utils/windowUtils";
 
-const {
-  ElectronBlocker,
-  fullLists,
-  Request
-} = require("@cliqz/adblocker-electron");
-const fetch = require("node-fetch");
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'cross-fetch'; // required 'fetch'
 
 function parseScriptPath(p: string) {
   return path.resolve(__dirname, p);
@@ -124,34 +118,8 @@ export default async function () {
       }
     );
 
-    const blocker = await ElectronBlocker.fromLists(fetch, fullLists, {
-    enableCompression: true
-  });
-
-  blocker.enableBlockingInSession(win.webContents.session);
-
-  blocker.on("request-blocked", request => {
-    console.log("blocked", request.tabId, request.url);
-  });
-
-  blocker.on("request-redirected", request => {
-    console.log("redirected", request.tabId, request.url);
-  });
-
-  blocker.on("request-whitelisted", request => {
-    console.log("whitelisted", request.tabId, request.url);
-  });
-
-  blocker.on("csp-injected", request => {
-    console.log("csp", request.url);
-  });
-
-  blocker.on("script-injected", (script, url) => {
-    console.log("script", script.length, url);
-  });
-
-  blocker.on("style-injected", (style, url) => {
-    console.log("style", style.length, url);
+  ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+    blocker.enableBlockingInSession(win.webContents.session.defaultSession);
   });
     
     const loadingView = await createApiView("/youtube/loading", (view) => {
