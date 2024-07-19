@@ -17,6 +17,7 @@
     "vcs": "vue-cli-service"
   },
   "dependencies": {
+    "@cliqz/adblocker-electron": "^1.30.0",
     "@headlessui/vue": "^1.6.7",
     "@poppinss/utils": "^5.0.0",
     "@sentry/electron": "^3.0.7",
